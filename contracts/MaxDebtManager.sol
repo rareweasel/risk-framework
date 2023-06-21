@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.4;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -52,6 +52,7 @@ contract MaxDebtManager is AccessControlEnumerable {
         ) = IRiskFramework(riskFramework).getTargetInfo(strategy);
         uint256 averagePrecision = IRiskFramework(riskFramework).AVERAGE_PRECISION();
         (IRiskImpactController.Status status, IRiskImpactController.ImpactRange memory impactRange) = IRiskImpactController(riskImpactController).getImpactInfo(totalAssetsUsd, uint8(averageScore / averagePrecision));
+        status;
 
         newMaxDebt = impactRange.max;
         currentDebt = strategyParams.current_debt;
