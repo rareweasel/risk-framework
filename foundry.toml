@@ -1,0 +1,18 @@
+[profile.default]
+src = "contracts"
+out = "out"
+libs = ["lib"]
+
+remappings = [
+    "@openzeppelin=lib/openzeppelin-contracts",
+    "@yearn-vaults=lib/yearn-vaults",
+    "@aave-core=lib/aave-v3-core",
+    "@uniswap-core=lib/v3-core",
+    "@uniswap-periphery=lib/v3-periphery",
+    "@uniswap/v3-core=lib/v3-core", # used in sub-dependencies
+    "@prb/test/=lib/prb-test/src/",
+]
+
+ffi = true     # to enable vyperDeployer calling vyper compiler
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
