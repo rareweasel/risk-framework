@@ -24,4 +24,4 @@ The values are manipulated by bitwise operators in the library `ScoresLib.sol`.
 
 - It supports up to 15 scores.
 - The scores are processed in order (right to left).
-- The sorting process cannot be change in the scores. It means that if the first score (right) represents the Testing score, the it cannot be changed to the second place, because as we saw before, the final number (decimal representation) would change.
+- The sorting process cannot be change in the scores. It means that if the first score (right) represents the Testing score, then it cannot be changed to the second place, because as we saw before, the final number (decimal representation) would change.
