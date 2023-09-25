@@ -49,7 +49,7 @@ contract MaxDebtManager is AccessControlEnumerable {
             ,
             ,
             uint128 averageScore,
-        ) = IRiskFramework(riskFramework).getTargetInfo(strategy);
+        ) = IRiskFramework(riskFramework).getTargetInfo(1, strategy);
         uint256 averagePrecision = IRiskFramework(riskFramework).AVERAGE_PRECISION();
         (IRiskImpactController.Status status, IRiskImpactController.ImpactRange memory impactRange) = IRiskImpactController(riskImpactController).getImpactInfo(totalAssetsUsd, uint8(averageScore / averagePrecision));
         status;
