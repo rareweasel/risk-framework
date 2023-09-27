@@ -21,17 +21,15 @@ contract RiskFrameworkTest is Test {
     uint256 internal constant ARB_NETWORK_ID = 42161;
 
     RiskFramework internal riskFramework;
-    address internal owner;
     address internal configurator;
     address internal admin;
     uint256 internal constant CURRENT_SCORES = 7;
     uint256 internal constant MAX_SCORES = 15;
 
     function setUp() public {
-        owner = address(0x1);
         configurator = address(0x2);
         admin = address(0x3);
-        riskFramework = new RiskFramework(owner, configurator, admin, CURRENT_SCORES);
+        riskFramework = new RiskFramework(configurator, admin, CURRENT_SCORES);
     }
 
     function test_fromScoreToList_successful_max_score() external {
@@ -80,56 +78,39 @@ contract RiskFrameworkTest is Test {
         _fromScoreToList_successful(scores, expectedScore, expectedAverageScore);
     }
 
-    function test_setUp_successful(address _owner, address _configurator, address _admin, uint256 _scores) external {
-        vm.assume(_owner != address(0x0));
+    function test_setUp_successful(address _configurator, address _admin, uint256 _scores) external {
         vm.assume(_configurator != address(0x0));
         vm.assume(_admin != address(0x0));
         vm.assume(_scores > 0 && _scores <= MAX_SCORES);
         address deployer = address(0x9999999999);
         hoax(deployer);
-        RiskFramework instance = new RiskFramework(_owner, _configurator, _admin, _scores);
+        RiskFramework instance = new RiskFramework(_configurator, _admin, _scores);
 
         assertEq(instance.currentScores(), _scores, "invalid scores");
-        assertTrue(instance.hasRole(instance.OWNER_ROLE(), _owner), "invalid owner");
         assertTrue(instance.hasRole(instance.CONFIGURATOR_ROLE(), _configurator), "invalid configurator");
         assertTrue(instance.hasRole(instance.DEFAULT_ADMIN_ROLE(), _admin), "invalid admin");
-        assertFalse(instance.hasRole(instance.OWNER_ROLE(), deployer), "invalid owner (deployer)");
         assertFalse(instance.hasRole(instance.CONFIGURATOR_ROLE(), deployer), "invalid configurator (deployer)");
         assertFalse(instance.hasRole(instance.DEFAULT_ADMIN_ROLE(), deployer), "invalid admin (deployer)");
     }
 
-    function test_setUp_invalid_owner(address _configurator, address _admin, uint256 _scores) external {
-        address initialOwner = address(0x0);
-        vm.assume(_configurator != address(0x0));
-        vm.assume(_admin != address(0x0));
-        vm.assume(_scores > 0 && _scores <= MAX_SCORES);
-        address deployer = address(0x9999999999);
-        hoax(deployer);
-
-        vm.expectRevert("!initial_owner");
-        new RiskFramework(initialOwner, _configurator, _admin, _scores);
-    }
-
-    function test_setUp_invalid_configurator(address _owner, address _admin, uint256 _scores) external {
+    function test_setUp_invalid_configurator(address _admin, uint256 _scores) external {
         address initialConfigurator = address(0x0);
-        vm.assume(_owner != address(0x0));
         vm.assume(_admin != address(0x0));
         vm.assume(_scores > 0 && _scores <= MAX_SCORES);
         address deployer = address(0x9999999999);
         hoax(deployer);
         vm.expectRevert("!initial_configurator");
-        new RiskFramework(_owner, initialConfigurator, _admin, _scores);
+        new RiskFramework(initialConfigurator, _admin, _scores);
     }
 
-    function test_setUp_invalid_admin(address _owner, address _configurator, uint256 _scores) external {
+    function test_setUp_invalid_admin(address _configurator, uint256 _scores) external {
         address initialAdmin = address(0x0);
-        vm.assume(_owner != address(0x0));
         vm.assume(_configurator != address(0x0));
         vm.assume(_scores > 0 && _scores <= MAX_SCORES);
         address deployer = address(0x9999999999);
         hoax(deployer);
         vm.expectRevert("!initial_admin");
-        new RiskFramework(_owner, _configurator, initialAdmin, _scores);
+        new RiskFramework(_configurator, initialAdmin, _scores);
     }
 
     function test_setScoresAndTags_successful_same_scores(address _target) external {
@@ -207,6 +188,19 @@ contract RiskFrameworkTest is Test {
         uint256 _expectedAverageScore = 1000; // (7 / 7) * 1000
         uint256 _expectedTagsListLength = 1;
         _setScoreAndTags_successful(configurator, _score, _tags, _toArray(_target), scores, _expectedAverageScore, _expectedTagsListLength);
+    }
+
+    function test_setScoreAndTags_invalid_scores_targets_length(address _target) external {
+        vm.assume(_target != address(0x0));
+        bytes32[] memory _tags = new bytes32[](1);
+        _tags[0] = "aave";
+        uint128[] memory _scores = new uint128[](2);
+        _scores[0] = 1108378657;
+        _scores[1] = 1108378657;
+        
+        hoax(configurator);
+        vm.expectRevert("!target_scores_length");
+        riskFramework.setScoreAndTags(ETH_NETWORK_ID, _toArray(_target), _tags, _scores);
     }
 
     function test_setScoreAndTags_invalid_target_empty() external {
