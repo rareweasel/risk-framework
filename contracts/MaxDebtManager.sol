@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./interfaces/IRiskImpactController.sol";
 import "./interfaces/IRiskFramework.sol";
-import "./interfaces/yearn/v3/IVault.sol";
-import "./interfaces/yearn/v3/IStrategy.sol";
+import "./interfaces/yearn/v3/IVaultV3.sol";
+import "./interfaces/yearn/v3/IStrategyV3.sol";
 import "./interfaces/yearn/v3/IOracle.sol";
 
 contract MaxDebtManager is AccessControlEnumerable {
@@ -40,10 +40,10 @@ contract MaxDebtManager is AccessControlEnumerable {
 
     function getDebtInfo(address vault, address strategy, address oracle) external view 
     returns (uint256 newMaxDebt, uint256 currentMaxDebt, uint256 currentDebt) {
-        address asset = IStrategy(strategy).asset();
-        uint256 totalAssets = IStrategy(strategy).totalAssets();
+        address asset = IStrategyV3(strategy).asset();
+        uint256 totalAssets = IStrategyV3(strategy).totalAssets();
         uint256 totalAssetsUsd = IOracle(oracle).getNormalizedValueUsdc(asset, totalAssets);
-        IVault.StrategyParams memory strategyParams = IVault(vault).strategies(strategy);
+        IVaultV3.StrategyParams memory strategyParams = IVaultV3(vault).strategies(strategy);
         
         (
             ,

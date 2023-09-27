@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.20;
-pragma experimental ABIEncoderV2;
 
-interface IVault {
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
+interface IVaultV3 is IERC20, IERC20Metadata {
 
     struct StrategyParams {
         uint256 activation;
@@ -12,6 +14,8 @@ interface IVault {
     }
     
     function asset() external view returns (address _asset);
+
+    function totalAssets() external view returns (uint256 _totalAssets);
 
     function strategies(address strategy) external view returns (StrategyParams calldata);
 
