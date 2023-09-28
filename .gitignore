@@ -13,6 +13,8 @@ docs/
 
 # Dotenv file
 .env
+.env.mumbai
+.env.polygon
 
 # node
 node_modules
