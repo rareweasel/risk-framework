@@ -15,8 +15,6 @@ export const fromScoreToNumber = (scores: number[], padding: number = 5, printAl
         console.log(`1. Decimal notations: ${decimalNotation}`);
         console.log(`2. Binary notations:  ${result.join(' | ')} => ${result.join('')}`);
         console.log(`3. Decimal notation:  ${decimal} = ${result.join('')}`);
-    } else {
-        console.log(decimal);
     }
     return decimal;
 };
@@ -30,8 +28,6 @@ export const fromNumberToScore = (number: number, totalScores: number = 7, bitsP
         console.log(`1. Binary number:      ${binaryNumber}`);
         console.log(`2. Binary notations:   ${binaryNotations.join(' | ')}`);
         console.log(`3. Decimal notations:  ${decimalNotations.map(score => score.toString().padStart(bitsPerScore, ' ')).join(' | ')}`);
-    } else {
-        console.log(decimalNotations);
     }
     return decimalNotations;
 };
