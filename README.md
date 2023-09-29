@@ -34,4 +34,8 @@ forge create --rpc-url <your_rpc_url> --constructor-args 0x757f29A77D90a45b188c0
 
 ### ImpactCalculator Contract
 
-forge create --rpc-url <your_rpc_url> --private-key <your_private_key> --etherscan-api-key <your_etherscan_api_key> --verify contracts/lens/ImpactCalculator.sol:ImpactCalculator
+This script uses the create2 opcode to pre-defined the contract address:
+
+`forge script ./script/ImpactCalculator.s.sol:ImpactCalculatorScript --rpc-url <rpc-url> --etherscan-api-key <etherscan-api-key> --broadcast --verify -vvvv`
+
+`forge create --rpc-url <your_rpc_url> --private-key <your_private_key> --etherscan-api-key <your_etherscan_api_key> --verify contracts/lens/ImpactCalculator.sol:ImpactCalculator`

@@ -20,7 +20,6 @@
     "gas-report": "forge test -vvv --gas-report",
     "gas-snapshot": "forge snapshot -vvv",
     "gas-diff": "forge snapshot --diff",
-    "lint:sol": "prettier --write 'src/**/*.sol' 'test/**/*.sol'",
-    "deploy:impact-calculator": "forge script ./script/ImpactCalculatorDeploy.s.sol:ImpactCalculatorDeployScript --broadcast --verify -vvvv"
+    "lint:sol": "prettier --write 'src/**/*.sol' 'test/**/*.sol'"
   }
 }

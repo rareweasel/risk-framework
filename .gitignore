@@ -12,9 +12,8 @@ out/
 docs/
 
 # Dotenv file
-.env
-.env.mumbai
-.env.polygon
+.env*
+!.env.template
 
 # node
 node_modules
@@ -23,7 +22,10 @@ yarn-error.log
 lcov.info
 
 .vscode
+
+# Foundry
 remappings.txt
+broadcast/
 
 # Python
 .python-version
