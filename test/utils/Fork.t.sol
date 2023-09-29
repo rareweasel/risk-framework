@@ -17,15 +17,21 @@ abstract contract ForkTest is Test {
     string public constant AVAX_ONE_RPC_URL = "AVAX_ONE_RPC_URL";
     
     ImpactCalculator internal impactCalculator;
-    uint256 internal forkId;
+    mapping ( string => uint256 ) internal forkIds;
 
     function _setUp() internal {
         impactCalculator = new ImpactCalculator();
     }
 
     function _activateFork(string memory urlOrAlias) internal returns (uint256) {
-        forkId = vm.createSelectFork(vm.rpcUrl(urlOrAlias));
-        assertEq(vm.activeFork(), forkId, "invalid fork id");
-        return forkId;
+        uint256 currentForkId = forkIds[urlOrAlias];
+        if (currentForkId != 0) {
+            vm.selectFork(currentForkId);
+        } else {
+            currentForkId = vm.createSelectFork(vm.rpcUrl(urlOrAlias));
+            forkIds[urlOrAlias] = currentForkId;
+        }
+        assertEq(vm.activeFork(), currentForkId, "invalid fork id");
+        return currentForkId;
     }
 }
