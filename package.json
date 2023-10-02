@@ -5,6 +5,7 @@
   "devDependencies": {
     "@types/minimist": "^1.2.2",
     "@types/node": "^20.6.1",
+    "axios": "^1.5.1",
     "colors": "^1.4.0",
     "minimist": "^1.2.8",
     "prettier": "^2.8.8",
@@ -15,12 +16,12 @@
   "scripts": {
     "scores-to-number": "npx ts-node ./script/scores-to-number.ts",
     "number-to-scores": "npx ts-node ./script/number-to-scores.ts",
+    "get-risk-scores": "npx ts-node ./script/getCurrentRiskScores.ts",
     "coverage": "forge coverage --report lcov",
     "test": "forge test -vvv --ffi",
     "gas-report": "forge test -vvv --gas-report",
     "gas-snapshot": "forge snapshot -vvv",
     "gas-diff": "forge snapshot --diff",
-    "lint:sol": "prettier --write 'src/**/*.sol' 'test/**/*.sol'",
-    "deploy:impact-calculator": "forge script ./script/ImpactCalculatorDeploy.s.sol:ImpactCalculatorDeployScript --broadcast --verify -vvvv"
+    "lint:sol": "prettier --write 'src/**/*.sol' 'test/**/*.sol'"
   }
 }
