@@ -30,7 +30,7 @@ interface IRiskFramework {
     /** Events */
 
     event ScoreSet(uint256 indexed _network, address indexed target, uint128 score);
-    event TagsSet(uint256 indexed _network, address indexed target, bytes32[] indexed tagsList);
-    event TagsRemoved(uint256 indexed _network, address indexed target, bytes32[] indexed tagsList);
+    event TagSet(uint256 indexed _network, address indexed target, bytes32 indexed tag);
+    event TagRemoved(uint256 indexed _network, address indexed target, bytes32 indexed tag);
 }
 

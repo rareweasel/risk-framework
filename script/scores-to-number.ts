@@ -14,7 +14,8 @@ const execute = async (parsedArgs: ParsedArgs) => {
 
   const scores = parsedArgs.scores.split(",").map((score:string) => parseInt(score));
   const bitsPerScore = parsedArgs.bitsPerScore ? parsedArgs.bitsPerScore : 5;
-  fromScoreToNumber(scores, bitsPerScore, false);
+  const number = fromScoreToNumber(scores, bitsPerScore, false);
+  console.log(`Decimal Score: ${number}`);
 };
 
 execute(args)

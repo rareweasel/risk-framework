@@ -19,6 +19,7 @@
     "number-to-scores": "npx ts-node ./script/number-to-scores.ts",
     "get-risk-scores": "npx ts-node ./script/getCurrentRiskScores.ts",
     "tags-to-bytes32": "npx ts-node ./script/tags-to-bytes32.ts",
+    "get-risk-scores-subgraph": "npx ts-node ./script/get-risk-scores-subgraph.ts",
     "coverage": "forge coverage --report lcov",
     "test": "forge test -vvv --ffi",
     "gas-report": "forge test -vvv --gas-report",
