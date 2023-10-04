@@ -75,8 +75,8 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
 
         _setRoleAdmin(CONFIGURATOR_ROLE, DEFAULT_ADMIN_ROLE);
 
-        _setupRole(CONFIGURATOR_ROLE, _initialConfiguratorAddress);
-        _setupRole(DEFAULT_ADMIN_ROLE, _initialAdminAddress);
+        _grantRole(CONFIGURATOR_ROLE, _initialConfiguratorAddress);
+        _grantRole(DEFAULT_ADMIN_ROLE, _initialAdminAddress);
         currentScores = _initialCurrentScores;
     }
 
@@ -342,9 +342,9 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
             targetsByTag[tag].add(target);
             tagsByTarget[_network][target].add(tag);
             _addNetworkInTargetIfNeeded(_network, target);
-        }
 
-        emit TagsSet(_network, target, tagsList);
+            emit TagSet(_network, target, tag);
+        }
     }
 
     /**
@@ -376,8 +376,8 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
 
             require(tagsByTarget[_network][target].remove(tag) == true, "!tag_removed");
             require(targetsByTag[tag].remove(target) == true, "!target_removed");
-        }
 
-        emit TagsRemoved(_network, target, tagsList);
+            emit TagRemoved(_network, target, tag);
+        }
     }
 }

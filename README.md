@@ -26,11 +26,30 @@ The values are manipulated by bitwise operators in the library `ScoresLib.sol`.
 - The scores are processed in order (right to left).
 - The sorting process cannot be change in the scores. It means that if the first score (right) represents the Testing score, then it cannot be changed to the second place, because as we saw before, the final number (decimal representation) would change.
 
+### Scores
+
+The scores must be set in this order:
+
+- Audit
+- Code Review
+- Complexity
+- Protocol Safety
+- Team Knowledge
+- Testing
+
+### How to Get the Decimal Score from List of Scores
+
+- Call `fromListToScore` (view) function passing the scores list as parameter.
+
+### How to Get the List of Scores from Decimal Score
+
+- Call `fromScoreToList` (view) function passing the score value as parameter.
+
 ## Deployment Scripts
 
 ### RiskFramework Contract
 
-forge create --rpc-url <your_rpc_url> --constructor-args 0x757f29A77D90a45b188c095A04aFa19F497c8B0E 0x757f29A77D90a45b188c095A04aFa19F497c8B0E 7 --private-key <your_private_key> --etherscan-api-key <your_etherscan_api_key> --verify contracts/RiskFramework.sol:RiskFramework
+forge create --rpc-url <your_rpc_url> --constructor-args 0x757f29A77D90a45b188c095A04aFa19F497c8B0E 0x757f29A77D90a45b188c095A04aFa19F497c8B0E 6 --private-key <your_private_key> --etherscan-api-key <your_etherscan_api_key> --verify contracts/RiskFramework.sol:RiskFramework
 
 ### ImpactCalculator Contract
 
@@ -39,3 +58,23 @@ This script uses the create2 opcode to pre-defined the contract address:
 `forge script ./script/ImpactCalculator.s.sol:ImpactCalculatorScript --rpc-url <rpc-url> --etherscan-api-key <etherscan-api-key> --broadcast --verify -vvvv`
 
 `forge create --rpc-url <your_rpc_url> --private-key <your_private_key> --etherscan-api-key <your_etherscan_api_key> --verify contracts/lens/ImpactCalculator.sol:ImpactCalculator`
+
+## Deployment Addresses
+
+More info [here](./DEPLOYMENTS.md).
+
+## Scripts
+
+More info [here](./SCRIPTS.md).
+
+## Network IDs
+
+- Ethereum = 1
+- Binance Smart Chain = 56
+- Polygon = 137
+- Fantom = 250
+- Base = 8453
+- Avalanche = 43114
+- Optimism = 10
+- Linea = 59144
+- Arbitrum = 42161
