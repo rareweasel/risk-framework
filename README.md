@@ -62,3 +62,19 @@ This script uses the create2 opcode to pre-defined the contract address:
 ## Deployment Addresses
 
 More info [here](./DEPLOYMENTS.md).
+
+## Scripts
+
+More info [here](./SCRIPTS.md).
+
+## Network IDs
+
+- Ethereum = 1
+- Binance Smart Chain = 56
+- Polygon = 137
+- Fantom = 250
+- Base = 8453
+- Avalanche = 43114
+- Optimism = 10
+- Linea = 59144
+- Arbitrum = 42161

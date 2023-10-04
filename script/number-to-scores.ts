@@ -7,7 +7,7 @@ const args = parseArgvs(process.argv.slice(2), {
 });
 
 /**
-    Example: yarn number-to-scores --number 3360820354 --totalScores 7 --bitsPerScore 5
+    Example: yarn number-to-scores --number 3360820354 --totalScores 6 --bitsPerScore 5
  */
 const execute = async (parsedArgs: ParsedArgs) => {
   if (!parsedArgs.number) throw new Error("Missing scores argument");
