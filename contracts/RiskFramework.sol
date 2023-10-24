@@ -113,6 +113,39 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
     }
 
     /**
+     * Copies the scores from a target to a list of new targets.
+     * 
+     * @param _network network id where the targets and scores will be located.
+     * @param _fromTarget target address to copy the score.
+     * @param _toTargets list of targets to set the score.
+     * @param _tagsList list of tags to set for all the targets.
+     */
+    function copyScores(
+        uint256 _network,
+        address _fromTarget,
+        address[] calldata _toTargets,
+        bytes32[] calldata _tagsList
+    ) external override {
+        require(hasRole(CONFIGURATOR_ROLE, _msgSender()), "!configurator");
+        require(_toTargets.length > 0, "!to_targets");
+        uint128 _score = scoresByTarget[_network][_fromTarget];
+        require(_score > 0, "!score");
+        bytes32[] memory _fromTagsList = tagsByTarget[_network][_fromTarget].values();
+
+        uint256 totalTargets = _toTargets.length;
+        for (uint256 i = 0; i < totalTargets; ++i) {
+            address _toTarget = _toTargets[i];
+            _setScore(_network, _toTarget, _score);
+            if (_tagsList.length == 0) {
+                _setTags(_network, _toTarget, _fromTagsList);
+            } else {
+                _setTags(_network, _toTarget, _tagsList);
+            }
+            emit ScoreCopied(_network, _fromTarget, _toTarget, _score);
+        }
+    }
+
+    /**
      * Sets the same score to multiple targets.
      * 
      * @notice this function should be used to set the same score to different targets.
@@ -330,7 +363,7 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
      * @param target target address to set the tags.
      * @param tagsList list of tags to set to the target.
      */
-    function _setTags(uint256 _network, address target, bytes32[] calldata tagsList) internal {
+    function _setTags(uint256 _network, address target, bytes32[] memory tagsList) internal {
         require(target != address(0x0), "!target");
         require(tagsList.length > 0, "!tags_list");
 
