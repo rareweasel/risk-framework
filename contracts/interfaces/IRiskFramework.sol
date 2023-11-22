@@ -9,6 +9,12 @@ interface IRiskFramework {
     function setScore(uint256 _network, address[] calldata _targets, uint128 _score) external;
     function setTags(uint256 _network, address[] calldata _targets, bytes32[] calldata _tagsList) external;
     function removeTags(uint256 _network, address[] calldata _targets, bytes32[] calldata _tagsList) external;
+    function copyScores(
+        uint256 _network,
+        address _fromTarget,
+        address[] calldata _toTargets,
+        bytes32[] calldata _tagsList
+    ) external;
 
     /** View Functions */
 
@@ -36,9 +42,10 @@ interface IRiskFramework {
 
     /** Events */
 
-    event ScoreSet(uint256 indexed network, address indexed target, uint128 score);
-    event TagSet(uint256 indexed network, address indexed target, bytes32 indexed tag);
-    event TagRemoved(uint256 indexed network, address indexed target, bytes32 indexed tag);
+    event ScoreSet(uint256 indexed _network, address indexed target, uint128 score);
+    event TagSet(uint256 indexed _network, address indexed target, bytes32 indexed tag);
+    event TagRemoved(uint256 indexed _network, address indexed target, bytes32 indexed tag);
+    event ScoreCopied(uint256 indexed network, address indexed fromTarget, address indexed toTarget, uint128 score);
     event TargetStatusSet(uint256 indexed network, address indexed target, bool indexed isActive);
 }
 

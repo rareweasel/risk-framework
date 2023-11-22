@@ -812,6 +812,153 @@ contract RiskFrameworkTest is Test {
         assertFalse(isActive, "Status should be equal to inactive");
     }
 
+    function test_copyScores_successful_max_scores(address _target) external {
+        vm.assume(_target != address(0x0));
+
+        bytes32[] memory _tags = new bytes32[](1);
+        _tags[0] = "compound";
+        uint128[] memory scores = new uint128[](7);
+        scores[0] = 5;
+        scores[1] = 5;
+        scores[2] = 5;
+        scores[3] = 5;
+        scores[4] = 5;
+        scores[5] = 5;
+        scores[6] = 5;
+        uint128 _score = 5541893285;
+        uint256 _expectedAverageScore = 5000; // (35 / 7) * 1000
+        uint256 _expectedTagsListLength = 1;
+
+        _setScoreAndTags_successful(configurator, _score, _tags, _toArray(_target), scores, _expectedAverageScore, _expectedTagsListLength);
+
+        address[] memory _toTargets = new address[](2);
+        _toTargets[0] = address(0x00000001111111);
+        _toTargets[1] = address(0x00000002222222);
+
+        hoax(configurator);
+        riskFramework.copyScores(ETH_NETWORK_ID, _target, _toTargets, _tags);
+        uint256 totalTargets = _toTargets.length;
+
+        for (uint256 globalIndex = 0; globalIndex < totalTargets; ++globalIndex) {
+            _assert_setScoresAndTags_successful(_score, _tags, _toTargets[globalIndex], scores, _expectedAverageScore, _expectedTagsListLength, totalTargets + 1);
+        }
+    }
+
+    function test_copyScores_successful_successful_diff_scores(address _target) external {
+        vm.assume(_target != address(0x0));
+
+        address[] memory _toTargets = new address[](2);
+        _toTargets[0] = address(0x000011111111111);
+        _toTargets[1] = address(0x000022222222222);
+        bytes32[] memory _toTargetTags = new bytes32[](2);
+        _toTargetTags[0] = "aura";
+        _toTargetTags[1] = "compound";
+
+        bytes32[] memory _tags = new bytes32[](2);
+        _tags[0] = "curve";
+        _tags[1] = "convex";
+        uint128[] memory scores = new uint128[](7);
+        scores[0] = 5;
+        scores[1] = 3;
+        scores[2] = 2;
+        scores[3] = 3;
+        scores[4] = 4;
+        scores[5] = 2;
+        scores[6] = 1;
+        uint128 _score = 5471572033;
+        uint256 _expectedAverageScore = 2857; // (20 / 7) * 1000
+        uint256 _expectedTagsListLength = 2;
+        
+        _setScoreAndTags_successful(configurator, _score, _tags, _toArray(_target), scores, _expectedAverageScore, _expectedTagsListLength);
+
+        hoax(configurator);
+        riskFramework.copyScores(ETH_NETWORK_ID, _target, _toTargets, _toTargetTags);
+        uint256 totalTargets = _toTargets.length;
+
+        for (uint256 globalIndex = 0; globalIndex < totalTargets; ++globalIndex) {
+            _assert_setScoresAndTags_successful(_score, _toTargetTags, _toTargets[globalIndex], scores, _expectedAverageScore, _expectedTagsListLength, totalTargets);
+        }
+    }
+
+    function test_copyScores_successful_successful_diff_scores_and_empty_tags(address _target) external {
+        vm.assume(_target != address(0x0));
+
+        address[] memory _toTargets = new address[](2);
+        _toTargets[0] = address(0x000011111111111);
+        _toTargets[1] = address(0x000022222222222);
+        bytes32[] memory _toTargetTags = new bytes32[](0);
+
+        bytes32[] memory _tags = new bytes32[](2);
+        _tags[0] = "curve";
+        _tags[1] = "convex";
+        uint128[] memory scores = new uint128[](7);
+        scores[0] = 5;
+        scores[1] = 3;
+        scores[2] = 2;
+        scores[3] = 3;
+        scores[4] = 4;
+        scores[5] = 2;
+        scores[6] = 1;
+        uint128 _score = 5471572033;
+        uint256 _expectedAverageScore = 2857; // (20 / 7) * 1000
+        uint256 _expectedTagsListLength = 2;
+        
+        _setScoreAndTags_successful(configurator, _score, _tags, _toArray(_target), scores, _expectedAverageScore, _expectedTagsListLength);
+
+        hoax(configurator);
+        riskFramework.copyScores(ETH_NETWORK_ID, _target, _toTargets, _toTargetTags);
+        uint256 totalTargets = _toTargets.length;
+
+        for (uint256 globalIndex = 0; globalIndex < totalTargets; ++globalIndex) {
+            _assert_setScoresAndTags_successful(_score, _toTargetTags, _toTargets[globalIndex], scores, _expectedAverageScore, _expectedTagsListLength, totalTargets);
+        }
+    }
+
+    function test_copyScores_successful_invalid_sender(address _target) external {
+        vm.assume(_target != address(0x0));
+
+        address[] memory _toTargets = new address[](2);
+        _toTargets[0] = address(0x000011111111111);
+        _toTargets[1] = address(0x000022222222222);
+        bytes32[] memory _toTargetTags = new bytes32[](2);
+        _toTargetTags[0] = "aura";
+        _toTargetTags[1] = "compound";
+
+        address _sender = address(0x127a11d);
+
+        hoax(_sender);
+        vm.expectRevert("!configurator");
+        riskFramework.copyScores(ETH_NETWORK_ID, _target, _toTargets, _toTargetTags);
+    }
+
+    function test_copyScores_successful_invalid_score_zero(address _fromTarget) external {
+        vm.assume(_fromTarget != address(0x0));
+
+        address[] memory _toTargets = new address[](2);
+        _toTargets[0] = address(0x000011111111111);
+        _toTargets[1] = address(0x000022222222222);
+        bytes32[] memory _toTargetTags = new bytes32[](2);
+        _toTargetTags[0] = "aura";
+        _toTargetTags[1] = "compound";
+
+        hoax(configurator);
+        vm.expectRevert("!score");
+        riskFramework.copyScores(ETH_NETWORK_ID, _fromTarget, _toTargets, _toTargetTags);
+    }
+
+    function test_copyScores_successful_invalid_to_targets_empty(address _target) external {
+        vm.assume(_target != address(0x0));
+
+        address[] memory _toTargets = new address[](0);
+        bytes32[] memory _toTargetTags = new bytes32[](2);
+        _toTargetTags[0] = "aura";
+        _toTargetTags[1] = "compound";
+        
+        hoax(configurator);
+        vm.expectRevert("!to_targets");
+        riskFramework.copyScores(ETH_NETWORK_ID, _target, _toTargets, _toTargetTags);
+    }
+
     function test_setScore_invalid_empty_targets_length() external {
         uint128 _score = 1108378657;
         
