@@ -139,14 +139,16 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
     ) external override {
         require(hasRole(CONFIGURATOR_ROLE, _msgSender()), "!configurator");
         require(_toTargets.length > 0, "!to_targets");
-        uint128 _score = scoresByTarget[_network][_fromTarget];
+        uint128 _score = _scoresByTarget[_network][_fromTarget];
         require(_score > 0, "!score");
-        bytes32[] memory _fromTagsList = tagsByTarget[_network][_fromTarget].values();
+        bytes32[] memory _fromTagsList = _tagsByTarget[_network][_fromTarget].values();
 
         uint256 totalTargets = _toTargets.length;
         for (uint256 i = 0; i < totalTargets; ++i) {
             address _toTarget = _toTargets[i];
+            require(_toTarget != address(0x0), "!target");
             _setScore(_network, _toTarget, _score);
+            _setTargetStatus(_network, _toTarget, ACTIVE);
             if (_tagsList.length == 0) {
                 _setTags(_network, _toTarget, _fromTagsList);
             } else {

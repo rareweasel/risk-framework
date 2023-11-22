@@ -910,7 +910,7 @@ contract RiskFrameworkTest is Test {
         uint256 totalTargets = _toTargets.length;
 
         for (uint256 globalIndex = 0; globalIndex < totalTargets; ++globalIndex) {
-            _assert_setScoresAndTags_successful(_score, _toTargetTags, _toTargets[globalIndex], scores, _expectedAverageScore, _expectedTagsListLength, totalTargets);
+            _assert_setScoresAndTags_successful(_score, _tags, _toTargets[globalIndex], scores, _expectedAverageScore, _expectedTagsListLength, totalTargets + 1);
         }
     }
 
@@ -1117,7 +1117,6 @@ contract RiskFrameworkTest is Test {
         for (uint256 index = 0; index < _expectedTagsListLength; ++index) {
             assertEq(tagsList[index], _tags[index], "invalid tag");
             assertEq(riskFramework.getTargetsByTag(_tags[index]).length, _expectedTargetsByTag, "invalid targets by tag length");
-            // TODO assertEq(riskFramework.getTargetsByTag(_tags[index])[0], _target, "invalid targets by tag");
         }
     }
 
