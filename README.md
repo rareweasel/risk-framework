@@ -78,3 +78,18 @@ More info [here](./SCRIPTS.md).
 - Optimism = 10
 - Linea = 59144
 - Arbitrum = 42161
+
+## How to Verify Whether a Target is Supported in The ORF or Not
+
+```solidity
+uint256 networkId = ...;
+address target = 0x...;
+(
+    uint128 scores,
+    uint8[] memory scoresList,
+    uint128 averageScore,
+    bytes32[] memory tagsList,
+    bool isActive
+) = riskFramework.getTargetInfo(networkId, target);
+require(scores > 0 && isActive);
+```

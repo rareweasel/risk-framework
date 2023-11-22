@@ -41,3 +41,7 @@ Go to [script](./script/tags-to-bytes32.ts).
 `yarn get-risk-scores-subgraph --network 0` or `yarn get-risk-scores-subgraph --network 1`
 
 Go to [script](./script/get-risk-scores-subgraph.ts).
+
+## Set the Scores to a List of Targets
+
+`forge script ./script/SetScore.s.sol:SetScoreScript --rpc-url <rpc-url> --etherscan-api-key <etherscan-api-key> -vvvv --broadcastfy`
