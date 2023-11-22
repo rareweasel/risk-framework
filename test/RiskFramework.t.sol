@@ -78,6 +78,27 @@ contract RiskFrameworkTest is Test {
         _fromScoreToList_successful(scores, expectedScore, expectedAverageScore);
     }
 
+    function test_fromScoreToList_successful_incorrect_scores_length() external {
+        uint8[] memory scores = new uint8[](5);
+        scores[0] = 5;
+        scores[1] = 3;
+        scores[2] = 2;
+        scores[3] = 3;
+        scores[4] = 4;
+        uint128 expectedScore = 0;
+        uint128 expectedAverageScore = 0;
+
+        (uint128 score, uint128 averageScore) = riskFramework.fromListToScore(scores);
+
+        (uint8[] memory expectedScores,) = riskFramework.fromScoreToList(score);
+
+        assertEq(score, expectedScore, "invalid score");
+        assertEq(averageScore, expectedAverageScore, "invalid average score");
+        for (uint256 index = 0; index < scores.length; ++index) {
+            assertEq(expectedScores[index], 0, "invalid item score");
+        }
+    }
+
     function test_setUp_successful(address _configurator, address _admin, uint256 _scores) external {
         vm.assume(_configurator != address(0x0));
         vm.assume(_admin != address(0x0));
@@ -316,9 +337,10 @@ contract RiskFrameworkTest is Test {
         _tags[0] = "curve";
         _tags[1] = "convex";
         _tags[2] = "compound";
+        uint128 _score = 5471572033;
 
         hoax(configurator);
-        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+        riskFramework.setScoreAndTags(ETH_NETWORK_ID, _toArray(_target), _tags, _score);
 
         bytes32[] memory _tagsToRemove = new bytes32[](2);
         _tagsToRemove[0] = "curve";
@@ -331,8 +353,11 @@ contract RiskFrameworkTest is Test {
             ,
             ,
             ,
-            bytes32[] memory tagsList
+            bytes32[] memory tagsList,
+            bool isActive
         ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
+
+        assertTrue(isActive, "target should be active");
 
         uint256 totalTagsToRemove = _tagsToRemove.length;
         uint256 totalTagsToCheck = tagsList.length;
@@ -357,9 +382,10 @@ contract RiskFrameworkTest is Test {
         _tags[0] = "curve";
         _tags[1] = "convex";
         _tags[2] = "compound";
+        uint128 _score = 5471572033;
 
         hoax(configurator);
-        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+        riskFramework.setScoreAndTags(ETH_NETWORK_ID, _toArray(_target), _tags, _score);
         
         hoax(configurator);
         riskFramework.removeTags(ETH_NETWORK_ID, _toArray(_target), _tags);
@@ -368,9 +394,11 @@ contract RiskFrameworkTest is Test {
             ,
             ,
             ,
-            bytes32[] memory tagsList
+            bytes32[] memory tagsList,
+            bool isActive
         ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
 
+        assertTrue(isActive, "target should be active");
         assertEq(tagsList.length, 0, "should have removed all tags");
     }
 
@@ -381,9 +409,10 @@ contract RiskFrameworkTest is Test {
         _tags[0] = "curve";
         _tags[1] = "convex";
         _tags[2] = "compound";
+        uint128 _score = 5471572033;
 
         hoax(configurator);
-        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+        riskFramework.setScoreAndTags(ETH_NETWORK_ID, _toArray(_target), _tags, _score);
 
         bytes32[] memory _tagsToRemove = new bytes32[](1);
         _tagsToRemove[0] = "";
@@ -396,9 +425,11 @@ contract RiskFrameworkTest is Test {
             ,
             ,
             ,
-            bytes32[] memory tagsList
+            bytes32[] memory tagsList,
+            bool isActive
         ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
 
+        assertTrue(isActive, "target should be active");
         assertEq(tagsList.length, _tags.length, "should have not removed any tag");
     }
 
@@ -409,9 +440,10 @@ contract RiskFrameworkTest is Test {
         _tags[0] = "curve";
         _tags[1] = "convex";
         _tags[2] = "compound";
+        uint128 _score = 5471572033;
 
         hoax(configurator);
-        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+        riskFramework.setScoreAndTags(ETH_NETWORK_ID, _toArray(_target), _tags, _score);
 
         bytes32[] memory _tagsToRemove = new bytes32[](2);
         _tagsToRemove[0] = "curve";
@@ -425,9 +457,11 @@ contract RiskFrameworkTest is Test {
             ,
             ,
             ,
-            bytes32[] memory tagsList
+            bytes32[] memory tagsList,
+            bool isActive
         ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
 
+        assertTrue(isActive, "target should be active");
         assertEq(tagsList.length, _tags.length, "should have not removed any tag");
     }
 
@@ -438,9 +472,10 @@ contract RiskFrameworkTest is Test {
         _tags[0] = "curve";
         _tags[1] = "convex";
         _tags[2] = "compound";
+        uint128 _score = 5471572033;
 
         hoax(configurator);
-        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+        riskFramework.setScoreAndTags(ETH_NETWORK_ID, _toArray(_target), _tags, _score);
         bytes32[] memory _tagsToRemove = new bytes32[](0);
 
         
@@ -452,9 +487,11 @@ contract RiskFrameworkTest is Test {
             ,
             ,
             ,
-            bytes32[] memory tagsList
+            bytes32[] memory tagsList,
+            bool isActive
         ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
 
+        assertTrue(isActive, "target should be active");
         assertEq(tagsList.length, _tags.length, "should have not removed any tag");
     }
 
@@ -465,9 +502,10 @@ contract RiskFrameworkTest is Test {
         _tags[0] = "curve";
         _tags[1] = "convex";
         _tags[2] = "compound";
+        uint128 _score = 5471572033;
 
         hoax(configurator);
-        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+        riskFramework.setScoreAndTags(ETH_NETWORK_ID, _toArray(_target), _tags, _score);
         
         hoax(configurator);
         vm.expectRevert("!targets");
@@ -477,9 +515,11 @@ contract RiskFrameworkTest is Test {
             ,
             ,
             ,
-            bytes32[] memory tagsList
+            bytes32[] memory tagsList,
+            bool isActive
         ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
 
+        assertTrue(isActive, "target should be active");
         assertEq(tagsList.length, _tags.length, "should have not removed any tag");
     }
 
@@ -490,21 +530,24 @@ contract RiskFrameworkTest is Test {
         _tags[0] = "curve";
         _tags[1] = "convex";
         _tags[2] = "compound";
+        uint128 _score = 5471572033;
 
         hoax(configurator);
-        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+        riskFramework.setScoreAndTags(ETH_NETWORK_ID, _toArray(_target), _tags, _score);
         
         hoax(configurator);
-        vm.expectRevert("!target");
+        vm.expectRevert("!score");
         riskFramework.removeTags(ETH_NETWORK_ID, new address[](1), _tags);
         
         (
             ,
             ,
             ,
-            bytes32[] memory tagsList
+            bytes32[] memory tagsList,
+            bool isActive
         ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
 
+        assertTrue(isActive, "target should be active");
         assertEq(tagsList.length, _tags.length, "should have not removed any tag");
     }
 
@@ -515,9 +558,10 @@ contract RiskFrameworkTest is Test {
         _tags[0] = "curve";
         _tags[1] = "convex";
         _tags[2] = "compound";
+        uint128 _score = 5471572033;
 
         hoax(configurator);
-        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+        riskFramework.setScoreAndTags(ETH_NETWORK_ID, _toArray(_target), _tags, _score);
         
         hoax(address(0x99999999));
         vm.expectRevert("!configurator");
@@ -527,10 +571,245 @@ contract RiskFrameworkTest is Test {
             ,
             ,
             ,
-            bytes32[] memory tagsList
+            bytes32[] memory tagsList,
+            bool isActive
         ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
 
+        assertTrue(isActive, "target should be active");
         assertEq(tagsList.length, _tags.length, "should have not removed any tag");
+    }
+
+    function test_setTags_successful(address _target) external {
+        vm.assume(_target != address(0x0));
+        uint128 _score = 5471572033;
+
+        hoax(configurator);
+        riskFramework.setScore(ETH_NETWORK_ID, _toArray(_target), _score);
+
+        bytes32[] memory _tags = new bytes32[](2);
+        _tags[0] = "curve";
+        _tags[1] = "convex";
+
+        hoax(configurator);
+        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+
+        uint128 expectedAverageScore = 2857;
+        (
+            uint128 scores,
+            uint8[] memory scoresList,
+            uint128 averageScore,
+            bytes32[] memory tagsList,
+            bool isActive
+        ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
+
+        assertTrue(isActive, "Target should be inactive");
+        assertEq(scores, _score, "invalid scores");
+        assertEq(scoresList.length, CURRENT_SCORES, "invalid scores length");
+        assertEq(averageScore, expectedAverageScore, "invalid average score");
+        assertEq(tagsList.length, _tags.length, "invalid tags length");
+    }
+
+    function test_setTags_invalid_no_scores(address _target) external {
+        vm.assume(_target != address(0x0));
+
+        bytes32[] memory _tags = new bytes32[](2);
+        _tags[0] = "curve";
+        _tags[1] = "convex";
+
+        hoax(configurator);
+        vm.expectRevert("!score");
+        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+
+        (
+            uint128 scores,
+            uint8[] memory scoresList,
+            uint128 averageScore,
+            bytes32[] memory tagsList,
+            bool isActive
+        ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
+
+        assertFalse(isActive, "Target should be inactive");
+        assertEq(scores, 0, "invalid scores");
+        assertEq(scoresList.length, CURRENT_SCORES, "invalid scores length");
+        assertEq(averageScore, 0, "invalid average score");
+        assertEq(tagsList.length, 0, "invalid tags length");
+    }
+
+    function test_setTags_invalid_empty_tags(address _target) external {
+        vm.assume(_target != address(0x0));
+        uint128 _score = 5471572033;
+
+        hoax(configurator);
+        riskFramework.setScore(ETH_NETWORK_ID, _toArray(_target), _score);
+
+        bytes32[] memory _tags = new bytes32[](0);
+
+        hoax(configurator);
+        vm.expectRevert("!tags_list");
+        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+
+        uint128 expectedAverageScore = 2857;
+        (
+            uint128 scores,
+            uint8[] memory scoresList,
+            uint128 averageScore,
+            bytes32[] memory tagsList,
+            bool isActive
+        ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
+
+        assertTrue(isActive, "Target should be inactive");
+        assertEq(scores, _score, "invalid scores");
+        assertEq(scoresList.length, CURRENT_SCORES, "invalid scores length");
+        assertEq(averageScore, expectedAverageScore, "invalid average score");
+        assertEq(tagsList.length, 0, "invalid tags length");
+    }
+
+    function test_setTags_invalid_sender(address _target) external {
+        vm.assume(_target != address(0x0));
+        uint128 _score = 5471572033;
+
+        hoax(configurator);
+        riskFramework.setScore(ETH_NETWORK_ID, _toArray(_target), _score);
+
+        bytes32[] memory _tags = new bytes32[](2);
+        _tags[0] = "curve";
+        _tags[1] = "convex";
+
+        hoax(address(0x1234567890));
+        vm.expectRevert("!configurator");
+        riskFramework.setTags(ETH_NETWORK_ID, _toArray(_target), _tags);
+
+        uint128 expectedAverageScore = 2857;
+        (
+            uint128 scores,
+            uint8[] memory scoresList,
+            uint128 averageScore,
+            bytes32[] memory tagsList,
+            bool isActive
+        ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
+
+        assertTrue(isActive, "Target should be inactive");
+        assertEq(scores, _score, "invalid scores");
+        assertEq(scoresList.length, CURRENT_SCORES, "invalid scores length");
+        assertEq(averageScore, expectedAverageScore, "invalid average score");
+        assertEq(tagsList.length, 0, "invalid tags length");
+    }
+
+    function test_setTags_invalid_empty_targets() external {
+        bytes32[] memory _tags = new bytes32[](2);
+        _tags[0] = "curve";
+        _tags[1] = "convex";
+
+        hoax(configurator);
+        vm.expectRevert("!targets");
+        riskFramework.setTags(ETH_NETWORK_ID, new address[](0), _tags);
+
+        address _target = address(0x0);
+        (
+            uint128 scores,
+            uint8[] memory scoresList,
+            uint128 averageScore,
+            bytes32[] memory tagsList,
+            bool isActive
+        ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
+
+        assertFalse(isActive, "Target should be inactive");
+        assertEq(scores, 0, "invalid scores");
+        assertEq(scoresList.length, CURRENT_SCORES, "invalid scores length");
+        assertEq(averageScore, 0, "invalid average score");
+        assertEq(tagsList.length, 0, "invalid tags length");
+    }
+
+    function test_setTargetsStatus_successful(address _target) external {
+        vm.assume(_target != address(0x0));
+
+        bytes32[] memory _tags = new bytes32[](2);
+        _tags[0] = "curve";
+        _tags[1] = "convex";
+        uint128 _score = 5471572033;
+
+        hoax(configurator);
+        riskFramework.setScoreAndTags(ETH_NETWORK_ID, _toArray(_target), _tags, _score);
+
+        bool initialIsActive = riskFramework.INACTIVE();
+
+        hoax(configurator);
+        riskFramework.setTargetsStatus(ETH_NETWORK_ID, _toArray(_target), initialIsActive);
+
+        bool isActive = riskFramework.isTargetActive(ETH_NETWORK_ID, _target);
+        assertEq(initialIsActive, isActive, "is active should be equal");
+    }
+
+    function test_setTargetsStatus_invalid_already_active(address _target) external {
+        vm.assume(_target != address(0x0));
+
+        bytes32[] memory _tags = new bytes32[](2);
+        _tags[0] = "curve";
+        _tags[1] = "convex";
+        uint128 _score = 5471572033;
+
+        hoax(configurator);
+        riskFramework.setScoreAndTags(ETH_NETWORK_ID, _toArray(_target), _tags, _score);
+
+        bool initialIsActive = riskFramework.ACTIVE();
+
+        hoax(configurator);
+        vm.expectRevert("!status");
+        riskFramework.setTargetsStatus(ETH_NETWORK_ID, _toArray(_target), initialIsActive);
+
+        bool isActive = riskFramework.isTargetActive(ETH_NETWORK_ID, _target);
+        assertTrue(isActive, "Status should be equal to active");
+    }
+
+    function test_setTargetsStatus_invalid_no_exist(address _target) external {
+        vm.assume(_target != address(0x0));
+
+        bool initialIsActive = riskFramework.INACTIVE();
+
+        hoax(configurator);
+        vm.expectRevert("!status");
+        riskFramework.setTargetsStatus(ETH_NETWORK_ID, _toArray(_target), initialIsActive);
+
+        bool isActive = riskFramework.isTargetActive(ETH_NETWORK_ID, _target);
+        assertFalse(isActive, "Status should be equal to inactive");
+    }
+
+    function test_setTargetsStatus_invalid_sender(address _target) external {
+        vm.assume(_target != address(0x0));
+
+        bool initialIsActive = riskFramework.ACTIVE();
+
+        hoax(address(0x1234567890));
+        vm.expectRevert("!configurator");
+        riskFramework.setTargetsStatus(ETH_NETWORK_ID, _toArray(_target), initialIsActive);
+
+        bool isActive = riskFramework.isTargetActive(ETH_NETWORK_ID, _target);
+        assertFalse(isActive, "Status should be equal to inactive");
+    }
+
+    function test_setTargetsStatus_invalid_empty_target_list() external {
+        bool initialIsActive = riskFramework.ACTIVE();
+
+        hoax(configurator);
+        vm.expectRevert("!targets");
+        riskFramework.setTargetsStatus(ETH_NETWORK_ID, new address[](0), initialIsActive);
+
+        address _target = address(0x0);
+        bool isActive = riskFramework.isTargetActive(ETH_NETWORK_ID, _target);
+        assertFalse(isActive, "Status should be equal to inactive");
+    }
+
+    function test_setTargetsStatus_invalid_empty_target_item() external {
+        address _target = address(0x0);
+
+        bool initialIsActive = riskFramework.ACTIVE();
+
+        hoax(configurator);
+        vm.expectRevert("!target");
+        riskFramework.setTargetsStatus(ETH_NETWORK_ID, new address[](1), initialIsActive);
+
+        bool isActive = riskFramework.isTargetActive(ETH_NETWORK_ID, _target);
+        assertFalse(isActive, "Status should be equal to inactive");
     }
 
     function test_copyScores_successful_max_scores(address _target) external {
@@ -631,7 +910,7 @@ contract RiskFrameworkTest is Test {
         uint256 totalTargets = _toTargets.length;
 
         for (uint256 globalIndex = 0; globalIndex < totalTargets; ++globalIndex) {
-            _assert_setScoresAndTags_successful(_score, _toTargetTags, _toTargets[globalIndex], scores, _expectedAverageScore, _expectedTagsListLength, totalTargets);
+            _assert_setScoresAndTags_successful(_score, _tags, _toTargets[globalIndex], scores, _expectedAverageScore, _expectedTagsListLength, totalTargets + 1);
         }
     }
 
@@ -680,12 +959,150 @@ contract RiskFrameworkTest is Test {
         riskFramework.copyScores(ETH_NETWORK_ID, _target, _toTargets, _toTargetTags);
     }
 
+    function test_setScore_invalid_empty_targets_length() external {
+        uint128 _score = 1108378657;
+        
+        hoax(configurator);
+        vm.expectRevert("!targets");
+        riskFramework.setScore(ETH_NETWORK_ID, new address[](0), _score);
+
+        address _target = address(0x0);
+        (
+            uint128 scores,
+            uint8[] memory scoresList,
+            uint128 averageScore,
+            bytes32[] memory tagsList,
+            bool isActive
+        ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
+
+        assertFalse(isActive, "Target should be inactive");
+        assertEq(scores, 0, "invalid scores");
+        assertEq(scoresList.length, CURRENT_SCORES, "invalid scores length");
+        assertEq(averageScore, 0, "invalid average score");
+        assertEq(tagsList.length, 0, "invalid tags length");
+    }
+
+    function test_setScore_invalid_target_empty_item() external {
+        address _target = address(0x0);
+        uint128 _score = 1108378657;
+        
+        hoax(configurator);
+        vm.expectRevert("!target");
+        riskFramework.setScore(ETH_NETWORK_ID, _toArray(_target), _score);
+
+        (
+            uint128 scores,
+            uint8[] memory scoresList,
+            uint128 averageScore,
+            bytes32[] memory tagsList,
+            bool isActive
+        ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
+
+        assertFalse(isActive, "Target should be inactive");
+        assertEq(scores, 0, "invalid scores");
+        assertEq(scoresList.length, CURRENT_SCORES, "invalid scores length");
+        assertEq(averageScore, 0, "invalid average score");
+        assertEq(tagsList.length, 0, "invalid tags length");
+    }
+
+    function test_setScore_invalid_score_zero(address _target) external {
+        vm.assume(_target != address(0x0));
+        uint128 _score = 0;
+        
+        hoax(configurator);
+        vm.expectRevert("!score");
+        riskFramework.setScore(ETH_NETWORK_ID, _toArray(_target), _score);
+
+        (
+            uint128 scores,
+            uint8[] memory scoresList,
+            uint128 averageScore,
+            bytes32[] memory tagsList,
+            bool isActive
+        ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
+
+        assertFalse(isActive, "Target should be inactive");
+        assertEq(scores, 0, "invalid scores");
+        assertEq(scoresList.length, CURRENT_SCORES, "invalid scores length");
+        assertEq(averageScore, 0, "invalid average score");
+        assertEq(tagsList.length, 0, "invalid tags length");
+    }
+
+
+    function test_setScore_invalid_sender(address _target) external {
+        vm.assume(_target != address(0x0));
+        uint128 _score = 1108378657;
+        address _sender = address(0x127a11d);
+        
+        hoax(_sender);
+        vm.expectRevert("!configurator");
+        riskFramework.setScore(ETH_NETWORK_ID, _toArray(_target), _score);
+
+        (
+            uint128 scores,
+            uint8[] memory scoresList,
+            uint128 averageScore,
+            bytes32[] memory tagsList,
+            bool isActive
+        ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
+
+        assertFalse(isActive, "Target should be inactive");
+        assertEq(scores, 0, "invalid scores");
+        assertEq(scoresList.length, CURRENT_SCORES, "invalid scores length");
+        assertEq(averageScore, 0, "invalid average score");
+        assertEq(tagsList.length, 0, "invalid tags length");
+    }
+
+    function test_setScore_successful(address _target) external {
+        vm.assume(_target != address(0x0));
+        uint128 _score = 1108378657;
+        
+        hoax(configurator);
+        riskFramework.setScore(ETH_NETWORK_ID, _toArray(_target), _score);
+
+        (
+            uint128 scores,
+            uint8[] memory scoresList,
+            uint128 averageScore,
+            bytes32[] memory tagsList,
+            bool isActive
+        ) = riskFramework.getTargetInfo(ETH_NETWORK_ID, _target);
+
+        uint128 expectedAverageScore = 1 * 1000;
+        assertTrue(isActive, "Target should be inactive");
+        assertEq(scores, _score, "invalid score");
+        assertEq(scoresList.length, CURRENT_SCORES, "invalid scores length");
+        assertEq(averageScore, expectedAverageScore, "invalid average score");
+        assertEq(tagsList.length, 0, "invalid tags length");
+    }
+
+    function test_setScore_successful_multinetwork(address _target) external {
+        vm.assume(_target != address(0x0));
+        uint128 _score = 1108378657;
+        
+        hoax(configurator);
+        riskFramework.setScore(ETH_NETWORK_ID, _toArray(_target), _score);
+        hoax(configurator);
+        riskFramework.setScore(FTM_NETWORK_ID, _toArray(_target), _score);
+
+        uint256[] memory networks = riskFramework.getNetworksByTarget(_target);
+        assertEq(networks.length, 2, "invalid network length");
+        assertEq(networks[0], ETH_NETWORK_ID, "invalid eth network");
+        assertEq(networks[1], FTM_NETWORK_ID, "invalid eth network");
+    }
+
     // Internal Functions
 
     function _assert_setScoresAndTags_successful(uint128 _score, bytes32[] memory _tags, address _target, uint128[] memory _expectedScores, uint256 _expectedAverageScore, uint256 _expectedTagsListLength, uint256 _expectedTargetsByTag) internal {
+        uint256[] memory networks = riskFramework.getNetworksByTarget(_target);
+        assertEq(networks.length, 1, "networks length should be 1");
+        assertEq(networks[0], ETH_NETWORK_ID, "networks should be eth mainnet");
+
         assertEq(riskFramework.getScoresByTarget(ETH_NETWORK_ID, _target), _score, "invalid scores");
-        (uint128 scores, uint8[] memory scoresList, uint128 averageScore, bytes32[] memory tagsList) = riskFramework
+        (uint128 scores, uint8[] memory scoresList, uint128 averageScore, bytes32[] memory tagsList, bool isActive) = riskFramework
             .getTargetInfo(ETH_NETWORK_ID, _target);
+        
+        assertTrue(isActive, "target should be active");
         assertEq(scores, _score, "invalid scores");
         assertEq(scoresList.length, CURRENT_SCORES, "invalid scores length");
         for (uint256 index = 0; index < CURRENT_SCORES; ++index) {
@@ -696,12 +1113,10 @@ contract RiskFrameworkTest is Test {
         assertEq(averageScore, _expectedAverageScore, "invalid average score");
         assertEq(tagsList.length, _expectedTagsListLength, "invalid tags length");
 
-        if (_tags.length > 0) {
-            assertEq(tagsList[0], _tags[0], "invalid tag");
-            for (uint256 index = 0; index < _expectedTagsListLength; ++index) {
-                assertEq(tagsList[index], _tags[index], "invalid tag");
-                assertEq(riskFramework.getTargetsByTag(_tags[index]).length, _expectedTargetsByTag, "invalid targets by tag length");
-            }
+        assertEq(tagsList[0], _tags[0], "invalid tag");
+        for (uint256 index = 0; index < _expectedTagsListLength; ++index) {
+            assertEq(tagsList[index], _tags[index], "invalid tag");
+            assertEq(riskFramework.getTargetsByTag(_tags[index]).length, _expectedTargetsByTag, "invalid targets by tag length");
         }
     }
 

@@ -49,7 +49,7 @@ The scores must be set in this order:
 
 ### RiskFramework Contract
 
-forge create --rpc-url <your_rpc_url> --constructor-args 0x757f29A77D90a45b188c095A04aFa19F497c8B0E 0x757f29A77D90a45b188c095A04aFa19F497c8B0E 6 --private-key <your_private_key> --etherscan-api-key <your_etherscan_api_key> --verify contracts/RiskFramework.sol:RiskFramework
+`forge create --rpc-url <your_rpc_url> --constructor-args 0x757f29A77D90a45b188c095A04aFa19F497c8B0E 0x757f29A77D90a45b188c095A04aFa19F497c8B0E 6 --private-key <your_private_key> --etherscan-api-key <your_etherscan_api_key> --verify contracts/RiskFramework.sol:RiskFramework`
 
 ### ImpactCalculator Contract
 
