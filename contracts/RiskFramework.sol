@@ -24,6 +24,10 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
 
     uint256 public constant override AVERAGE_PRECISION = 1000;
 
+    bool public constant override ACTIVE = true;
+
+    bool public constant override INACTIVE = false;
+
     /**
          #15   #14   #13   #12   #11   #10    #9    #8    #7    #6    #5    #4    #3    #2   #1
         00000 00000 00000 00000 00000 00000 00000 00000 01010 01010 01010 01010 01010 01010 01010
@@ -41,16 +45,19 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
     uint256 public constant BITS_PER_SCORES = 5;
 
     // Tag name (lowercase) => list of targets
-    mapping(bytes32 => EnumerableSet.AddressSet) internal targetsByTag;
+    mapping(bytes32 => EnumerableSet.AddressSet) internal _targetsByTag;
 
     // Target => List of network ids
-    mapping(address => EnumerableSet.UintSet) internal networksByTarget;
+    mapping(address => EnumerableSet.UintSet) internal _networksByTarget;
+
+    // Network id => Target => Active or not
+    mapping(uint256 => mapping(address => bool)) internal _isTargetActive;
 
     // Network id => Target => List of tags
-    mapping(uint256 => mapping(address => EnumerableSet.Bytes32Set)) internal tagsByTarget;
+    mapping(uint256 => mapping(address => EnumerableSet.Bytes32Set)) internal _tagsByTarget;
 
     // Network id => Target => scores
-    mapping(uint256 => mapping(address => uint128)) internal scoresByTarget;
+    mapping(uint256 => mapping(address => uint128)) internal _scoresByTarget;
 
     /**
         Current available scores
@@ -102,12 +109,16 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
         require(_scores.length > 0, "!scores");
         require(_targets.length == _scores.length, "!target_scores_length");
         require(hasRole(CONFIGURATOR_ROLE, _msgSender()), "!configurator");
+        require(_tagsList.length > 0, "!tags_list");
 
         uint256 totalTargets = _targets.length;
         for (uint256 i = 0; i < totalTargets; ++i) {
             address target = _targets[i];
             uint128 _score = _scores[i];
+            require(target != address(0x0), "!target");
+            require(_score > 0, "!score");
             _setScore(_network, target, _score);
+            _setTargetStatus(_network, target, ACTIVE);
             _setTags(_network, target, _tagsList);
         }
     }
@@ -130,12 +141,16 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
         uint128 _score
     ) external override {
         require(_targets.length > 0, "!targets");
+        require(_score > 0, "!score");
         require(hasRole(CONFIGURATOR_ROLE, _msgSender()), "!configurator");
+        require(_tagsList.length > 0, "!tags_list");
 
         uint256 totalTargets = _targets.length;
         for (uint256 index = 0; index < totalTargets; ++index) {
             address target = _targets[index];
+            require(target != address(0x0), "!target");
             _setScore(_network, target, _score);
+            _setTargetStatus(_network, target, ACTIVE);
             _setTags(_network, target, _tagsList);
         }
     }
@@ -150,12 +165,36 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
      */
     function setScore(uint256 _network, address[] calldata _targets, uint128 _score) external override {
         require(_targets.length > 0, "!targets");
+        require(_score > 0, "!score");
         require(hasRole(CONFIGURATOR_ROLE, _msgSender()), "!configurator");
 
         uint256 totalTargets = _targets.length;
         for (uint256 index = 0; index < totalTargets; ++index) {
             address target = _targets[index];
+            require(target != address(0x0), "!target");
             _setScore(_network, target, _score);
+            _setTargetStatus(_network, target, ACTIVE);
+        }
+    }
+
+    /**
+     * Sets the status to a list of targets.
+     * 
+     * @dev the sender must have the configurator role.
+     * @param _network network id where the targets and score will be located.
+     * @param _targets list of targets to set the status.
+     * @param isActive status to set to the targets.
+     */
+    function setTargetsStatus(uint256 _network, address[] calldata _targets, bool isActive) external override {
+        require(_targets.length > 0, "!targets");
+        require(hasRole(CONFIGURATOR_ROLE, _msgSender()), "!configurator");
+
+        uint256 totalTargets = _targets.length;
+        for (uint256 index = 0; index < totalTargets; ++index) {
+            address target = _targets[index];
+            require(_isTargetActive[_network][target] != isActive, "!status");
+            require(target != address(0x0), "!target");
+            _setTargetStatus(_network, target, isActive);
         }
     }
 
@@ -169,11 +208,13 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
      */
     function setTags(uint256 _network, address[] calldata _targets, bytes32[] calldata _tagsList) external override {
         require(_targets.length > 0, "!targets");
+        require(_tagsList.length > 0, "!tags_list");
         require(hasRole(CONFIGURATOR_ROLE, _msgSender()), "!configurator");
 
         uint256 totalTargets = _targets.length;
         for (uint256 index = 0; index < totalTargets; ++index) {
             address target = _targets[index];
+            require(_scoresByTarget[_network][target] > 0, "!score");
             _setTags(_network, target, _tagsList);
         }
     }
@@ -188,11 +229,13 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
      */
     function removeTags(uint256 _network, address[] calldata _targets, bytes32[] calldata _tagsList) external override {
         require(_targets.length > 0, "!targets");
+        require(_tagsList.length > 0, "!tags_list");
         require(hasRole(CONFIGURATOR_ROLE, _msgSender()), "!configurator");
 
         uint256 totalTargets = _targets.length;
         for (uint256 index = 0; index < totalTargets; ++index) {
             address target = _targets[index];
+            require(_scoresByTarget[_network][target] > 0, "!score");
             _removeTags(_network, target, _tagsList);
         }
     }
@@ -216,11 +259,12 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
         external
         view
         override
-        returns (uint128 scores, uint8[] memory scoresList, uint128 averageScore, bytes32[] memory tagsList)
+        returns (uint128 scores, uint8[] memory scoresList, uint128 averageScore, bytes32[] memory tagsList, bool isActive)
     {
-        scores = scoresByTarget[_network][_target];
-        tagsList = tagsByTarget[_network][_target].values();
+        scores = _scoresByTarget[_network][_target];
+        tagsList = _tagsByTarget[_network][_target].values();
         (scoresList, averageScore) = fromScoreToList(scores);
+        isActive = _isTargetActive[_network][_target];
     }
 
     /**
@@ -278,7 +322,7 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
      * @param _tag tag name to get the targets.
      */
     function getTargetsByTag(bytes32 _tag) external view override returns (address[] memory targets) {
-        targets = targetsByTag[_tag].values();
+        targets = _targetsByTag[_tag].values();
     }
 
     /**
@@ -287,7 +331,7 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
      * @param _target target address to get the networks.
      */
     function getNetworksByTarget(address _target) external view override returns (uint256[] memory networks) {
-        networks = networksByTarget[_target].values();
+        networks = _networksByTarget[_target].values();
     }
 
     /**
@@ -297,7 +341,17 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
      * @param _target target address to get the tags.
      */
     function getScoresByTarget(uint256 _network, address _target) external view override returns (uint128) {
-        return scoresByTarget[_network][_target];
+        return _scoresByTarget[_network][_target];
+    }
+
+    /**
+     * Gets if a target is active or not.
+     * @param _network network id where the target is located.
+     * @param _target target address to get the tags.
+     * @return true if the target is active, false otherwise.
+     */
+    function isTargetActive(uint256 _network, address _target) external view override returns (bool) {
+        return _isTargetActive[_network][_target];
     }
 
     /** Internal Functions */
@@ -312,10 +366,7 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
      * @param score score to set to the target.
      */
     function _setScore(uint256 _network, address target, uint128 score) internal {
-        require(target != address(0x0), "!target");
-        require(score > 0, "!score");
-
-        scoresByTarget[_network][target] = score;
+        _scoresByTarget[_network][target] = score;
         _addNetworkInTargetIfNeeded(_network, target);
 
         emit ScoreSet(_network, target, score);
@@ -331,20 +382,25 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
      * @param tagsList list of tags to set to the target.
      */
     function _setTags(uint256 _network, address target, bytes32[] calldata tagsList) internal {
-        require(target != address(0x0), "!target");
-        require(tagsList.length > 0, "!tags_list");
 
         for (uint256 index = 0; index < tagsList.length; ++index) {
             bytes32 tag = tagsList[index];
             require(tag != "", "!tag_empty");
-            require(tagsByTarget[_network][target].contains(tag) == false, "!tag_already_set");
-            require(targetsByTag[tag].contains(target) == false, "!target_already_set");
-            targetsByTag[tag].add(target);
-            tagsByTarget[_network][target].add(tag);
+            require(_tagsByTarget[_network][target].contains(tag) == false, "!tag_already_set");
+            require(_targetsByTag[tag].contains(target) == false, "!target_already_set");
+            _targetsByTag[tag].add(target);
+            _tagsByTarget[_network][target].add(tag);
             _addNetworkInTargetIfNeeded(_network, target);
 
             emit TagSet(_network, target, tag);
         }
+    }
+
+    function _setTargetStatus(uint256 _network, address target, bool _status) internal {
+        
+        _isTargetActive[_network][target] = _status;
+
+        emit TargetStatusSet(_network, target, _status);
     }
 
     /**
@@ -354,8 +410,8 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
      * @param _target target address to add the network.
      */
     function _addNetworkInTargetIfNeeded(uint256 _network, address _target) internal {
-        if (networksByTarget[_target].contains(_network) == false) {
-            networksByTarget[_target].add(_network);
+        if (_networksByTarget[_target].contains(_network) == false) {
+            _networksByTarget[_target].add(_network);
         }
     }
 
@@ -367,15 +423,12 @@ contract RiskFramework is IRiskFramework, AccessControlEnumerable {
      * @param tagsList list of tags to remove from the target.
      */
     function _removeTags(uint256 _network, address target, bytes32[] calldata tagsList) internal {
-        require(target != address(0x0), "!target");
-        require(tagsList.length > 0, "!tags_list");
-
         for (uint256 index = 0; index < tagsList.length; ++index) {
             bytes32 tag = tagsList[index];
             require(tag != "", "!tag_empty");
 
-            require(tagsByTarget[_network][target].remove(tag) == true, "!tag_removed");
-            require(targetsByTag[tag].remove(target) == true, "!target_removed");
+            require(_tagsByTarget[_network][target].remove(tag) == true, "!tag_removed");
+            require(_targetsByTag[tag].remove(target) == true, "!target_removed");
 
             emit TagRemoved(_network, target, tag);
         }
