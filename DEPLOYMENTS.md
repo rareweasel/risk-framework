@@ -6,6 +6,7 @@
 
 ## RiskFramework
 
+- v3 - [Polygon](https://polygonscan.com/address/0x3505b13f90c6b8eb62664db5e397d1eea270e09b).
 - v2 - [Polygon](https://polygonscan.com/address/0x44458947c3e264791d1a68de577f841a663d95a8).
 - v1 - [Polygon](https://polygonscan.com/address/0x88e4c904aa2f25409556ef1b472a631c6c8eb6c8).
 
